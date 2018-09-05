@@ -1,0 +1,15 @@
+{
+  "name": "mac-workflow-uploader",
+  "version": "0.0.1",
+  "description": "workflow uploader",
+  "main": "index.js",
+  "dependencies": {
+    "qiniu": "^7.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ffx0s/MacWorkflowUploader"
+  },
+  "author": "ffx0s",
+  "license": "MIT"
+}
