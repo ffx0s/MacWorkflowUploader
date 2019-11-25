@@ -11,5 +11,6 @@
     "url": "https://github.com/ffx0s/MacWorkflowUploader"
   },
   "author": "ffx0s",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {}
 }
