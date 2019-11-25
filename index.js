@@ -45,14 +45,26 @@ function notification (title, content) {
 }
 
 function getClipboardImage(callback) {
-  exec('/usr/local/bin/pngpaste temp.png', function(err, stdout, stderr) {
+  const imagePath = path.join(__dirname, './temp.png')
+
+  exec(`/usr/local/bin/pngpaste temp.png`, function(err, stdout, stderr) {
     if (err || stderr) return callback(err || new Error(stderr))
-    callback(null, stdout)
+    callback(null, imagePath)
   })
 }
 
 function copy (text) {
   exec(`echo ${text} | pbcopy`)
+}
+
+function uploadSuccess ({ key }) {
+  const url = process.env.QINIU_DOMAIN + key
+  notification('上传成功', url)
+  copy(url)
+}
+
+function uploadError (err) {
+  notification('上传失败', err.message)
 }
 
 const uploader = new Uploader(
@@ -61,19 +73,26 @@ const uploader = new Uploader(
   process.env.QINIU_BUCKET
 )
 
-getClipboardImage(err => {
-  if (err) {
-    notification('获取图片失败', err.message)
-    throw err
+const filePath = process.argv[2]
+
+if (filePath) {
+  if (fs.statSync(filePath).isFile()) {
+    uploader.upload(filePath)
+      .then(uploadSuccess)
+      .catch(uploadError)
+  } else {
+    notification('路径错误：', filePath)
   }
-  const imagePath = path.join(__dirname, './temp.png')
-  uploader.upload(imagePath)
-    .then(({ key }) => {
-      const url = process.env.QINIU_DOMAIN + key
-      notification('上传成功', url)
-      copy(url)
-    })
-    .catch(err => {
-      notification('上传失败', err.message)
-    })
-})
+} else {
+  getClipboardImage((err, imagePath) => {
+    if (err) {
+      notification('获取图片失败', err.message)
+      throw err
+    }
+
+    uploader.upload(imagePath)
+      .then(uploadSuccess)
+      .catch(uploadError)
+  })
+}
+
